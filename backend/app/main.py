@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from app.core.config import settings
-from app.api.endpoints import rag, data
+from app.api.endpoints import rag, data, analysis, monitoring
 
 # Configure logging
 logging.basicConfig(
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Fyn RAG Investment Committee",
     description="AI-powered Investment Analysis System with Multi-Agent Architecture",
-    version="1.0.0",
+    version="2.0.0",
     debug=settings.DEBUG
 )
 
@@ -37,6 +37,8 @@ app.add_middleware(
 # Include routers
 app.include_router(rag.router, prefix="/api/v1")
 app.include_router(data.router, prefix="/api/v1")
+app.include_router(analysis.router, prefix="/api/v1")
+app.include_router(monitoring.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -45,7 +47,7 @@ async def root():
     return {
         "status": "online",
         "service": "Fyn RAG Investment Committee",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "environment": settings.ENVIRONMENT,
         "docs": "/docs",
         "api": "/api/v1"
