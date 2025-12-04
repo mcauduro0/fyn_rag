@@ -1,0 +1,58 @@
+# Framework e Servidor
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Banco de Dados
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Agentes e LLMs
+langchain==0.1.4
+langgraph==0.0.20
+langchain-openai==0.0.5
+langchain-anthropic==0.0.1
+openai==1.10.0
+anthropic==0.8.1
+
+# RAG e Vetores
+sentence-transformers==2.3.1
+faiss-cpu==1.7.4
+pandas==2.2.0
+numpy==1.26.3
+
+# APIs de Dados - Market Data
+polygon-api-client==1.12.4
+requests==2.31.0
+
+# APIs de Dados - Economic Data
+fredapi==0.5.1
+
+# APIs de Dados - Social Media
+praw==7.7.1
+
+# Processamento de Documentos
+python-docx==1.1.0
+pypdf==4.0.1
+openpyxl==3.1.2
+
+# Utilitários
+python-dotenv==1.0.1
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Comunicação em Tempo Real
+python-socketio==5.11.1
+
+# Testes
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+httpx==0.26.0
+
+# Code Quality
+black==24.1.1
+isort==5.13.2
+mypy==1.8.0
+flake8==7.0.0
