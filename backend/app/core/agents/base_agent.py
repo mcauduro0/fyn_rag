@@ -9,6 +9,8 @@ from datetime import datetime
 import logging
 from enum import Enum
 
+from app.core.llm.llm_client import LLMClient, LLMProvider
+
 logger = logging.getLogger(__name__)
 
 
@@ -86,6 +88,12 @@ class BaseAgent(ABC):
         self.llm_model = llm_model
         self.memory: List[Dict[str, Any]] = []
         
+        # Initialize LLM client
+        self.llm_client = LLMClient(
+            provider=LLMProvider.OPENAI,
+            model=llm_model
+        )
+        
         logger.info(f"Initialized {self.name} ({self.role.value})")
     
     @abstractmethod
@@ -107,6 +115,42 @@ class BaseAgent(ABC):
             AgentResponse with analysis and recommendation
         """
         pass
+    
+    async def _generate_analysis(self, prompt: str, system_prompt: str) -> str:
+        """
+        Generate analysis using LLM.
+        
+        Args:
+            prompt: Analysis prompt
+            system_prompt: System prompt with agent context
+            
+        Returns:
+            Generated analysis text
+        """
+        return await self.llm_client.generate(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            temperature=0.7,
+            max_tokens=2000
+        )
+    
+    async def _generate_structured_analysis(self, prompt: str, system_prompt: str, response_format: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generate structured analysis using LLM.
+        
+        Args:
+            prompt: Analysis prompt
+            system_prompt: System prompt
+            response_format: Expected JSON format
+            
+        Returns:
+            Parsed JSON response
+        """
+        return await self.llm_client.generate_structured(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            response_format=response_format
+        )
     
     @abstractmethod
     def get_relevant_frameworks(self) -> List[str]:

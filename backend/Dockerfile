@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -20,8 +21,9 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p /app/data/faiss_index
 
-# Expose port
-EXPOSE 8000
+# Expose port (Railway uses PORT env var)
+ENV PORT=8000
+EXPOSE $PORT
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
