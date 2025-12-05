@@ -9,7 +9,6 @@ from datetime import datetime
 from enum import Enum
 
 from app.core.agents.base_agent import AgentResponse, AgentRole
-from app.core.llm.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -68,17 +67,14 @@ class DebateSimulator:
     5. Consensus: Build final recommendation through weighted voting
     """
     
-    def __init__(self, max_rounds: int = 3, llm_model: str = "gpt-4"):
+    def __init__(self, max_rounds: int = 3):
         """
         Initialize debate simulator.
         
         Args:
             max_rounds: Maximum number of debate rounds
-            llm_model: LLM model to use for debate generation
         """
         self.max_rounds = max_rounds
-        self.llm_model = llm_model
-        self.llm_client = LLMClient(provider="openai")
         self.rounds: List[DebateRound] = []
         self.agent_responses: Dict[AgentRole, AgentResponse] = {}
         self.consensus_reached = False
@@ -311,36 +307,19 @@ class DebateSimulator:
         target: AgentRole,
         disagreement: str
     ) -> str:
-        """Generate a challenge statement using LLM."""
+        """Generate a challenge statement."""
         challenger_resp = self.agent_responses[challenger]
-        target_resp = self.agent_responses[target]
         
-        prompt = f"""
-        You are the {challenger.value} in an investment committee debate.
-        You disagree with the {target.value} regarding {disagreement}.
+        # Extract key supporting point
+        key_point = challenger_resp.concerns[0] if challenger_resp.concerns else \
+                   "fundamental analysis"
         
-        Your Analysis:
-        {challenger_resp.analysis[:500]}
+        challenge = f"{challenger.value.upper()} challenges {target.value.upper()}'s " \
+                   f"position ({disagreement}). " \
+                   f"Key concern: {key_point}. " \
+                   f"Supporting data: {list(challenger_resp.supporting_data.keys())[:2]}"
         
-        Your Recommendation: {challenger_resp.recommendation}
-        Your Key Concerns: {', '.join(challenger_resp.concerns[:3])}
-        
-        Target's Analysis:
-        {target_resp.analysis[:500]}
-        Target's Recommendation: {target_resp.recommendation}
-        
-        Generate a professional, data-driven challenge to the {target.value}'s position.
-        Focus on specific metrics, risks, or growth factors that they might have overlooked.
-        Keep it concise (under 100 words) and direct.
-        """
-        
-        try:
-            return await self.llm_client.generate(prompt, model=self.llm_model)
-        except Exception as e:
-            logger.error(f"Failed to generate challenge: {e}")
-            # Fallback to template
-            key_point = challenger_resp.concerns[0] if challenger_resp.concerns else "fundamental analysis"
-            return f"{challenger.value.upper()} challenges {target.value.upper()}'s position ({disagreement}). Key concern: {key_point}."
+        return challenge
     
     async def _generate_rebuttal(
         self,
@@ -348,33 +327,18 @@ class DebateSimulator:
         challenger: AgentRole,
         challenge: str
     ) -> str:
-        """Generate a rebuttal statement using LLM."""
+        """Generate a rebuttal statement."""
         defender_resp = self.agent_responses[defender]
         
-        prompt = f"""
-        You are the {defender.value} in an investment committee debate.
-        You have been challenged by the {challenger.value}.
+        # Extract key supporting point
+        key_point = defender_resp.opportunities[0] if defender_resp.opportunities else \
+                   "analysis framework"
         
-        Challenge: "{challenge}"
+        rebuttal = f"{defender.value.upper()} responds to {challenger.value.upper()}: " \
+                  f"While acknowledging concerns, {key_point} supports our position. " \
+                  f"Confidence: {defender_resp.confidence:.0%}"
         
-        Your Original Analysis:
-        {defender_resp.analysis[:500]}
-        
-        Your Recommendation: {defender_resp.recommendation}
-        Your Key Opportunities: {', '.join(defender_resp.opportunities[:3])}
-        
-        Generate a professional, evidence-based rebuttal.
-        Defend your position using your data and frameworks. Acknowledge valid points but explain why your thesis holds.
-        Keep it concise (under 100 words).
-        """
-        
-        try:
-            return await self.llm_client.generate(prompt, model=self.llm_model)
-        except Exception as e:
-            logger.error(f"Failed to generate rebuttal: {e}")
-            # Fallback to template
-            key_point = defender_resp.opportunities[0] if defender_resp.opportunities else "analysis framework"
-            return f"{defender.value.upper()} responds: While acknowledging concerns, {key_point} supports our position."
+        return rebuttal
     
     def _check_consensus(self) -> bool:
         """Check if consensus has been reached."""
@@ -421,7 +385,6 @@ if __name__ == "__main__":
     # Test debate simulator
     import asyncio
     from app.core.agents.base_agent import AgentResponse, AgentRole
-from app.core.llm.llm_client import LLMClient
     
     async def test():
         # Create mock agent responses
