@@ -276,6 +276,26 @@ class PerformanceMonitor:
         self.metrics.increment_counter("rag.queries")
         self.metrics.record_timer("rag.latency", duration)
         self.metrics.record_histogram("rag.results_count", num_results)
+
+    def track_analysis_request(
+        self,
+        ticker: Optional[str],
+        duration: float,
+        success: bool
+    ) -> None:
+        """Track investment analysis request metrics."""
+        tags = {
+            "ticker": ticker or "custom",
+            "status": "success" if success else "failure"
+        }
+
+        self.metrics.increment_counter("analysis.requests", tags=tags)
+        self.metrics.record_timer("analysis.duration", duration, tags=tags)
+
+        if success:
+            self.metrics.increment_counter("analysis.successful", tags=tags)
+        else:
+            self.metrics.increment_counter("analysis.failed", tags=tags)
     
     def update_system_metrics(self) -> None:
         """Update system resource metrics."""

@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neo-Brutalist Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-fyn-bg text-fyn-text font-mono antialiased;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-fyn-surface;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-fyn-border rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-fyn-text-dim;
+}
+
+/* Neo-Brutalist Components */
+.card {
+  @apply bg-fyn-surface border-2 border-fyn-border p-6;
+}
+
+.card-accent {
+  @apply bg-fyn-surface border-2 border-fyn-accent p-6;
+}
+
+.btn {
+  @apply px-4 py-2 font-mono font-semibold border-2 transition-all duration-150;
+}
+
+.btn-primary {
+  @apply bg-fyn-accent text-fyn-bg border-fyn-accent hover:bg-transparent hover:text-fyn-accent;
+}
+
+.btn-secondary {
+  @apply bg-transparent text-fyn-text border-fyn-border hover:border-fyn-accent hover:text-fyn-accent;
+}
+
+.btn-danger {
+  @apply bg-fyn-danger text-white border-fyn-danger hover:bg-transparent hover:text-fyn-danger;
+}
+
+/* Input Styles */
+.input {
+  @apply w-full px-4 py-3 bg-fyn-surface border-2 border-fyn-border text-fyn-text font-mono;
+  @apply focus:outline-none focus:border-fyn-accent;
+}
+
+.input::placeholder {
+  @apply text-fyn-text-dim;
+}
+
+/* Status Indicators */
+.status-badge {
+  @apply inline-flex items-center px-2 py-1 text-xs font-mono uppercase;
+}
+
+.status-success {
+  @apply bg-fyn-accent/20 text-fyn-accent border border-fyn-accent;
+}
+
+.status-warning {
+  @apply bg-fyn-warning/20 text-fyn-warning border border-fyn-warning;
+}
+
+.status-danger {
+  @apply bg-fyn-danger/20 text-fyn-danger border border-fyn-danger;
+}
+
+/* Animation */
+@keyframes terminal-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor {
+  animation: terminal-blink 1s infinite;
+}
+
+/* Loading Animation */
+.loading-pulse {
+  @apply animate-pulse bg-fyn-border;
+}
+
+/* Typography */
+.heading-1 {
+  @apply text-3xl font-bold tracking-tight;
+}
+
+.heading-2 {
+  @apply text-2xl font-semibold;
+}
+
+.heading-3 {
+  @apply text-xl font-medium;
+}
+
+.text-mono {
+  @apply font-mono text-sm;
+}
+
+/* Data Display */
+.metric-value {
+  @apply text-3xl font-bold text-fyn-accent;
+}
+
+.metric-label {
+  @apply text-sm text-fyn-text-dim uppercase tracking-wider;
+}
+
+/* Tables */
+.table-header {
+  @apply bg-fyn-border/50 text-fyn-text-dim uppercase text-xs tracking-wider;
+}
+
+.table-row {
+  @apply border-b border-fyn-border hover:bg-fyn-border/30 transition-colors;
+}
