@@ -201,7 +201,8 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
             
             for doc_path in request.documents:
                 try:
-                    doc_data = processor.process(doc_path)                   processed_docs.append(result)
+                    doc_data = processor.process(doc_path)
+                    processed_docs.append(doc_data)
                 except Exception as e:
                     logger.warning(f"Failed to process document {doc_path}: {e}")
             
