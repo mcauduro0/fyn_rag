@@ -168,7 +168,7 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         # Polygon data
         polygon = PolygonFetcher(api_key=settings.POLYGON_API_KEY)
         try:
-            quote = await polygon.fetch_quote(request.ticker)
+            quote = polygon.fetch_quote(request.ticker)
             context["current_price"] = quote.get("price")
             context["volume"] = quote.get("volume")
         except Exception as e:
@@ -177,10 +177,10 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         # FMP data
         fmp = FMPFetcher(api_key=settings.FMP_API_KEY)
         try:
-            profile = await fmp.fetch_company_profile(request.ticker)
+            profile = fmp.fetch_company_profile(request.ticker)
             context.update(profile)
             
-            financials = await fmp.fetch_comprehensive_data(request.ticker)
+            financials = fmp.fetch_comprehensive_data(request.ticker)
             context["financials"] = financials
         except Exception as e:
             logger.warning(f"Failed to fetch FMP data: {e}")
@@ -201,8 +201,7 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
             
             for doc_path in request.documents:
                 try:
-                    result = await processor.process_document(doc_path)
-                    processed_docs.append(result)
+                    doc_data = processor.process(doc_path)                   processed_docs.append(result)
                 except Exception as e:
                     logger.warning(f"Failed to process document {doc_path}: {e}")
             
