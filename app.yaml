@@ -20,6 +20,8 @@ services:
     value: your_polygon_api_key_here
   - key: FMP_API_KEY
     value: your_fmp_api_key_here
+  - key: CORS_ORIGINS
+    value: "*"
   - key: TRADING_ECONOMICS_API_KEY
     value: DB5A57F91781451:A8A888DFE5F9495
   - key: FRED_API_KEY
