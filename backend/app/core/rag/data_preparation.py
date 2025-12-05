@@ -64,7 +64,12 @@ class DataPreparation:
             raise FileNotFoundError(f"Knowledge base not found at {self.kb_path}")
         
         with open(self.kb_path, 'r', encoding='utf-8') as f:
-            self.frameworks = json.load(f)
+            data = json.load(f)
+            # Handle both list (legacy) and dict (enriched) formats
+            if isinstance(data, list):
+                self.frameworks = data
+            else:
+                self.frameworks = data.get("frameworks", [])
         
         logger.info(f"Loaded {len(self.frameworks)} frameworks")
     
