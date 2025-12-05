@@ -78,10 +78,10 @@ async def run_complete_analysis(
         
         # Step 2: Query RAG system for relevant frameworks
         rag_system = get_rag_system()
-        await rag_system.initialize()
+        rag_system.initialize()
         
         query = f"investment analysis frameworks for {request.ticker or request.company_name}"
-        rag_results = await rag_system.query(query, top_k=20)
+        rag_results = rag_system.query(query, top_k=20)
         
         # Step 3: Run multi-agent analysis
         agent_responses = await _run_agent_analyses(context, rag_results)
