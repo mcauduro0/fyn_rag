@@ -169,8 +169,12 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         polygon = PolygonFetcher(api_key=settings.POLYGON_API_KEY)
         try:
             quote = polygon.fetch_quote(request.ticker)
-            context["current_price"] = quote.get("price")
-            context["volume"] = quote.get("volume")
+            logger.info(f"DEBUG: quote type: {type(quote)}, value: {quote}")
+            if isinstance(quote, dict):
+                context["current_price"] = quote.get("price")
+                context["volume"] = quote.get("volume")
+            else:
+                logger.error(f"DEBUG: quote is not a dict: {quote}")
         except Exception as e:
             logger.warning(f"Failed to fetch Polygon data: {e}")
         
@@ -178,9 +182,14 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         fmp = FMPFetcher(api_key=settings.FMP_API_KEY)
         try:
             profile = fmp.fetch_company_profile(request.ticker)
-            context.update(profile)
+            logger.info(f"DEBUG: profile type: {type(profile)}, value: {profile}")
+            if isinstance(profile, dict):
+                context.update(profile)
+            else:
+                logger.error(f"DEBUG: profile is not a dict: {profile}")
             
             financials = fmp.fetch_comprehensive_data(request.ticker)
+            logger.info(f"DEBUG: financials type: {type(financials)}")
             context["financials"] = financials
         except Exception as e:
             logger.warning(f"Failed to fetch FMP data: {e}")
