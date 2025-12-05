@@ -165,21 +165,21 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         logger.info(f"Gathering market data for {request.ticker}")
         
         # Polygon data
-        polygon = PolygonFetcher()
+        polygon = PolygonFetcher(api_key=settings.POLYGON_API_KEY)
         try:
-            quote = await polygon.get_quote(request.ticker)
+            quote = await polygon.fetch_quote(request.ticker)
             context["current_price"] = quote.get("price")
             context["volume"] = quote.get("volume")
         except Exception as e:
             logger.warning(f"Failed to fetch Polygon data: {e}")
         
         # FMP data
-        fmp = FMPFetcher()
+        fmp = FMPFetcher(api_key=settings.FMP_API_KEY)
         try:
-            profile = await fmp.get_company_profile(request.ticker)
+            profile = await fmp.fetch_company_profile(request.ticker)
             context.update(profile)
             
-            financials = await fmp.get_financial_statements(request.ticker)
+            financials = await fmp.fetch_comprehensive_data(request.ticker)
             context["financials"] = financials
         except Exception as e:
             logger.warning(f"Failed to fetch FMP data: {e}")
