@@ -22,7 +22,7 @@ COPY backend/ .
 RUN mkdir -p /app/data/faiss_index
 
 # Expose port
-ENV PORT=8000
+ENV PORT=8080
 EXPOSE $PORT
 
 # Run the application
