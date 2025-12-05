@@ -9,19 +9,19 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy requirements from backend directory (context is root)
+COPY backend/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy application code from backend directory
+COPY backend/ .
 
 # Create necessary directories
 RUN mkdir -p /app/data/faiss_index
 
-# Expose port (Railway uses PORT env var)
+# Expose port
 ENV PORT=8000
 EXPOSE $PORT
 
