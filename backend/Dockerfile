@@ -9,13 +9,19 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements from backend directory (context is root)
-COPY backend/requirements.txt .
+# Install PyTorch CPU version first (lighter and prevents memory spikes)
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install sentence-transformers separately
+RUN pip install --no-cache-dir sentence-transformers==2.3.1
 
-# Copy application code from backend directory
+# Copy production requirements
+COPY backend/requirements-prod.txt .
+
+# Install remaining Python dependencies
+RUN pip install --no-cache-dir -r requirements-prod.txt
+
+# Copy application code
 COPY backend/ .
 
 # Create necessary directories
