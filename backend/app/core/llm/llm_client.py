@@ -8,6 +8,7 @@ import os
 from typing import Dict, Any, List, Optional
 from enum import Enum
 import asyncio
+import httpx
 
 from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
@@ -55,7 +56,11 @@ class LLMClient:
         
         # Initialize clients
         if provider == LLMProvider.OPENAI:
-            self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            # Explicitly create http_client to avoid proxy configuration issues
+            self.client = AsyncOpenAI(
+                api_key=settings.OPENAI_API_KEY,
+                http_client=httpx.AsyncClient()
+            )
             self.model = model or "gpt-4-turbo-preview"
         elif provider == LLMProvider.ANTHROPIC:
             self.client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
