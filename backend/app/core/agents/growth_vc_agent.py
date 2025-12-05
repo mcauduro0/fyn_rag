@@ -331,7 +331,7 @@ class GrowthVCAgent(BaseAgent):
         
         # Buy: good growth with solid unit economics
         if (growth_trajectory['current_growth'] > 20 and
-            unit_economics.get('ltv_cac_ratio', 0) >= 2.0):
+            (unit_economics.get('ltv_cac_ratio') or 0) >= 2.0):
             return "BUY"
         
         # Hold: moderate growth
@@ -340,7 +340,7 @@ class GrowthVCAgent(BaseAgent):
         
         # Sell: poor metrics
         if (growth_trajectory['current_growth'] < 5 or
-            unit_economics.get('ltv_cac_ratio', 0) < 1.0):
+            (unit_economics.get('ltv_cac_ratio') or 0) < 1.0):
             return "SELL"
         
         return "HOLD"
@@ -381,7 +381,7 @@ class GrowthVCAgent(BaseAgent):
         if rule_of_40 and rule_of_40['health'] == 'poor':
             concerns.append("Rule of 40 score below 20% indicates weak SaaS metrics")
         
-        if unit_economics.get('ltv_cac_ratio', 0) < 1.5:
+        if (unit_economics.get('ltv_cac_ratio') or 0) < 1.5:
             concerns.append("Low LTV/CAC ratio suggests inefficient customer acquisition")
         
         if metrics.get("burn_rate", 0) > metrics.get("cash", 0) / 12:

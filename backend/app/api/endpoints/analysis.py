@@ -169,29 +169,34 @@ async def _gather_data(request: AnalysisRequest) -> Dict[str, Any]:
         # Polygon data
         polygon = PolygonFetcher(api_key=settings.POLYGON_API_KEY)
         try:
-            quote = polygon.fetch_quote(request.ticker)
-            logger.info(f"DEBUG: quote type: {type(quote)}, value: {quote}")
-            if isinstance(quote, dict):
-                context["current_price"] = quote.get("price")
-                context["volume"] = quote.get("volume")
+            quote_response = polygon.fetch_quote(request.ticker)
+            logger.info(f"DEBUG: quote response: {quote_response}")
+            if isinstance(quote_response, dict) and quote_response.get("success") and quote_response.get("data"):
+                quote_data = quote_response["data"]
+                context["current_price"] = quote_data.get("price")
+                context["volume"] = quote_data.get("volume")
             else:
-                logger.error(f"DEBUG: quote is not a dict: {quote}")
+                logger.warning(f"Failed to extract quote data: {quote_response}")
         except Exception as e:
             logger.warning(f"Failed to fetch Polygon data: {e}")
         
         # FMP data
         fmp = FMPFetcher(api_key=settings.FMP_API_KEY)
         try:
-            profile = fmp.fetch_company_profile(request.ticker)
-            logger.info(f"DEBUG: profile type: {type(profile)}, value: {profile}")
-            if isinstance(profile, dict):
-                context.update(profile)
+            profile_response = fmp.fetch_company_profile(request.ticker)
+            logger.info(f"DEBUG: profile response: {profile_response}")
+            if isinstance(profile_response, dict) and profile_response.get("success") and profile_response.get("data"):
+                # Unwrap profile data into context
+                context.update(profile_response["data"])
             else:
-                logger.error(f"DEBUG: profile is not a dict: {profile}")
+                logger.warning(f"Failed to extract profile data: {profile_response}")
             
-            financials = fmp.fetch_comprehensive_data(request.ticker)
-            logger.info(f"DEBUG: financials type: {type(financials)}")
-            context["financials"] = financials
+            financials_response = fmp.fetch_comprehensive_data(request.ticker)
+            logger.info(f"DEBUG: financials response type: {type(financials_response)}")
+            if isinstance(financials_response, dict) and financials_response.get("success") and financials_response.get("data"):
+                context["financials"] = financials_response["data"]
+            else:
+                logger.warning(f"Failed to extract financials data: {financials_response}")
         except Exception as e:
             logger.warning(f"Failed to fetch FMP data: {e}")
         
