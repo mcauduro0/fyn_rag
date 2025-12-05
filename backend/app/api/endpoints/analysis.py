@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 import uuid
 
+from app.core.config import settings
 from app.api.schemas.agent_schemas import (
     AnalysisRequest,
     AnalysisResponse,
