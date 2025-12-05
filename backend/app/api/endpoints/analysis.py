@@ -34,6 +34,7 @@ from app.data.processors.document_processor import DocumentProcessor
 from app.core.utils.monitoring import get_performance_monitor
 from app.core.utils.rate_limiter import get_rate_limiter
 from app.core.utils.caching import cached_async
+from app.core.utils.serialization import sanitize_for_json
 
 logger = logging.getLogger(__name__)
 
@@ -124,17 +125,17 @@ async def run_complete_analysis(
                     agent_role=resp.agent_role.value,
                     analysis=resp.analysis,
                     recommendation=resp.recommendation,
-                    confidence=resp.confidence,
-                    supporting_data=resp.supporting_data,
+                    confidence=sanitize_for_json(resp.confidence),
+                    supporting_data=sanitize_for_json(resp.supporting_data),
                     frameworks_used=resp.frameworks_used,
                     concerns=resp.concerns,
                     opportunities=resp.opportunities
                 )
                 for role, resp in agent_responses.items()
             },
-            debate_result=DebateResult(**debate_result) if debate_result else None,
+            debate_result=DebateResult(**sanitize_for_json(debate_result)) if debate_result else None,
             final_recommendation=final_recommendation,
-            confidence=final_confidence,
+            confidence=sanitize_for_json(final_confidence),
             report_markdown=report_markdown,
             analysis_duration=duration,
             timestamp=datetime.utcnow().isoformat()
