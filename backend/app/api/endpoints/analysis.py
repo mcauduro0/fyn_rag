@@ -27,7 +27,7 @@ from app.core.agents.industry_competitive_agent import IndustryCompetitiveAgent
 from app.core.agents.financial_forensics_agent import FinancialForensicsAgent
 from app.core.reasoning.debate_simulator import DebateSimulator
 from app.core.reports.report_generator import ReportGenerator, ReportType
-from app.core.rag.rag_system import RAGSystem
+from app.core.rag.rag_system import RAGSystem, get_rag_system
 from app.data.fetchers.polygon_fetcher import PolygonFetcher
 from app.data.fetchers.fmp_fetcher import FMPFetcher
 from app.data.processors.document_processor import DocumentProcessor
@@ -77,7 +77,7 @@ async def run_complete_analysis(
         context = await _gather_data(request)
         
         # Step 2: Query RAG system for relevant frameworks
-        rag_system = RAGSystem()
+        rag_system = get_rag_system()
         await rag_system.initialize()
         
         query = f"investment analysis frameworks for {request.ticker or request.company_name}"
