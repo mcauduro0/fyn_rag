@@ -54,6 +54,12 @@ services:
         type: SECRET
       - key: REDDIT_USER_AGENT
         value: "FynRAG/1.0"
+      - key: POLYGON_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: FMP_API_KEY
+        scope: RUN_TIME
+        type: SECRET
       - key: CORS_ORIGINS
         value: "https://fyn-rag.ondigitalocean.app,http://localhost:3000"
 
