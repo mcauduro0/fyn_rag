@@ -111,3 +111,87 @@ export const getRAGStats = async () => {
   const response = await api.get('/rag/stats')
   return response.data
 }
+
+// ============================================================================
+// API HEALTH CHECK
+// ============================================================================
+
+export interface APIStatus {
+  name: string
+  status: 'connected' | 'error' | 'not_configured'
+  latency_ms?: number
+  last_checked: string
+  error?: string
+}
+
+export interface APIHealthResponse {
+  overall_status: 'healthy' | 'degraded' | 'unhealthy'
+  apis: APIStatus[]
+  timestamp: string
+}
+
+export interface APIConfiguration {
+  apis: Record<string, {
+    configured: boolean
+    description: string
+  }>
+  timestamp: string
+}
+
+export const getAPIHealth = async (): Promise<APIHealthResponse> => {
+  const response = await api.get('/api-health/status')
+  return response.data
+}
+
+export const checkSingleAPI = async (apiName: string): Promise<APIStatus> => {
+  const response = await api.get(`/api-health/status/${apiName}`)
+  return response.data
+}
+
+export const getAPIConfiguration = async (): Promise<APIConfiguration> => {
+  const response = await api.get('/api-health/configuration')
+  return response.data
+}
+
+// ============================================================================
+// MARKET DATA
+// ============================================================================
+
+export interface StockPrice {
+  ticker: string
+  price?: number
+  change?: number
+  change_percent?: number
+  volume?: number
+  market_cap?: number
+  name?: string
+}
+
+export interface EconomicIndicator {
+  series_id: string
+  latest_value: number
+  latest_date: string
+  title?: string
+}
+
+export const getStockPrice = async (ticker: string): Promise<StockPrice> => {
+  const result = await performAnalysis({
+    query: `Get current stock price for ${ticker}`,
+    ticker,
+    analysis_depth: 'quick'
+  })
+  return result.tool_results?.find(t => t.tool_name === 'get_stock_price')?.result as StockPrice || { ticker }
+}
+
+export const getMarketOverview = async () => {
+  const response = await api.get('/data/market-overview')
+  return response.data
+}
+
+export const getEconomicIndicators = async (indicators: string[]): Promise<Record<string, EconomicIndicator>> => {
+  const result = await performAnalysis({
+    query: `Get economic indicators: ${indicators.join(', ')}`,
+    analysis_depth: 'quick'
+  })
+  return result.tool_results?.find(t => t.tool_name === 'get_economic_indicators')?.result as Record<string, EconomicIndicator> || {}
+}

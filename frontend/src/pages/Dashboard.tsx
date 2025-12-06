@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { TrendingUp, Brain, Shield, BarChart3, AlertTriangle, CheckCircle } from 'lucide-react'
-import { getRAGStats, getAvailableTools, getAvailableFrameworks } from '../lib/api'
+import { TrendingUp, Brain, Shield, BarChart3, AlertTriangle, CheckCircle, Wifi, WifiOff, Loader2 } from 'lucide-react'
+import { getRAGStats, getAvailableTools, getAvailableFrameworks, getAPIHealth, APIStatus } from '../lib/api'
 
 function MetricCard({
   title,
@@ -47,6 +47,44 @@ function AgentCard({ name, status, specialty }: { name: string; status: 'online'
   )
 }
 
+function APIStatusCard({ api }: { api: APIStatus }) {
+  const getStatusColor = () => {
+    switch (api.status) {
+      case 'connected': return 'text-green-400 border-green-400'
+      case 'error': return 'text-red-400 border-red-400'
+      case 'not_configured': return 'text-yellow-400 border-yellow-400'
+      default: return 'text-gray-400 border-gray-400'
+    }
+  }
+
+  const getStatusIcon = () => {
+    switch (api.status) {
+      case 'connected': return <Wifi className="w-4 h-4" />
+      case 'error': return <WifiOff className="w-4 h-4" />
+      case 'not_configured': return <AlertTriangle className="w-4 h-4" />
+      default: return <Loader2 className="w-4 h-4 animate-spin" />
+    }
+  }
+
+  return (
+    <div className={`card border ${getStatusColor()}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {getStatusIcon()}
+          <span className="font-semibold">{api.name}</span>
+        </div>
+        <span className="text-xs uppercase">{api.status.replace('_', ' ')}</span>
+      </div>
+      {api.latency_ms && (
+        <p className="text-xs text-fyn-text-dim mt-2">{api.latency_ms}ms latency</p>
+      )}
+      {api.error && (
+        <p className="text-xs text-red-400 mt-2 truncate" title={api.error}>{api.error}</p>
+      )}
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { data: frameworks } = useQuery({
     queryKey: ['frameworks'],
@@ -56,6 +94,12 @@ export default function Dashboard() {
   const { data: tools } = useQuery({
     queryKey: ['tools'],
     queryFn: getAvailableTools,
+  })
+
+  const { data: apiHealth, isLoading: apiHealthLoading } = useQuery({
+    queryKey: ['apiHealth'],
+    queryFn: getAPIHealth,
+    refetchInterval: 60000, // Refresh every minute
   })
 
   const agents = [
@@ -154,6 +198,33 @@ export default function Dashboard() {
             </>
           )}
         </div>
+      </div>
+
+      {/* External API Status */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="heading-2">External API Status</h2>
+          {apiHealth && (
+            <span className={`status-badge ${
+              apiHealth.overall_status === 'healthy' ? 'status-success' :
+              apiHealth.overall_status === 'degraded' ? 'status-warning' : 'status-error'
+            }`}>
+              {apiHealth.overall_status}
+            </span>
+          )}
+        </div>
+        {apiHealthLoading ? (
+          <div className="flex items-center gap-2 text-fyn-text-dim">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Checking API status...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {apiHealth?.apis?.map((api) => (
+              <APIStatusCard key={api.name} api={api} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* System Status */}

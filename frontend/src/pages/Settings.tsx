@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Save, RefreshCw, Database, Brain, Globe, MessageSquare } from 'lucide-react'
-import { healthCheck, getAvailableTools } from '../lib/api'
+import { Save, RefreshCw, Database, Brain, Globe, MessageSquare, TrendingUp, Wifi, WifiOff, AlertTriangle, Loader2 } from 'lucide-react'
+import { healthCheck, getAvailableTools, getAPIConfiguration } from '../lib/api'
 
 export default function Settings() {
   const [defaultDepth, setDefaultDepth] = useState('standard')
@@ -18,6 +18,28 @@ export default function Settings() {
     queryKey: ['tools'],
     queryFn: getAvailableTools,
   })
+
+  const { data: apiConfig, isLoading: apiConfigLoading } = useQuery({
+    queryKey: ['apiConfig'],
+    queryFn: getAPIConfiguration,
+  })
+
+  const getStatusBadge = (configured: boolean) => {
+    if (configured) {
+      return <div className="ml-auto status-badge status-success flex items-center gap-1"><Wifi className="w-3 h-3" /> Configured</div>
+    }
+    return <div className="ml-auto status-badge status-warning flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Not Set</div>
+  }
+
+  const apiIcons: Record<string, React.ElementType> = {
+    polygon: TrendingUp,
+    fmp: TrendingUp,
+    fred: Globe,
+    trading_economics: Globe,
+    reddit: MessageSquare,
+    openai: Brain,
+    anthropic: Brain,
+  }
 
   return (
     <div className="space-y-8">
@@ -154,40 +176,28 @@ export default function Settings() {
       {/* API Integrations */}
       <div className="card">
         <h2 className="heading-2 mb-6">API Integrations</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-4 p-4 bg-fyn-bg border border-fyn-border">
-            <Globe className="w-8 h-8 text-fyn-accent" />
-            <div>
-              <p className="font-semibold">FRED API</p>
-              <p className="text-sm text-fyn-text-dim">Federal Reserve Economic Data</p>
-            </div>
-            <div className="ml-auto status-badge status-success">Connected</div>
+        {apiConfigLoading ? (
+          <div className="flex items-center gap-2 text-fyn-text-dim">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Loading API configuration...</span>
           </div>
-          <div className="flex items-center gap-4 p-4 bg-fyn-bg border border-fyn-border">
-            <Globe className="w-8 h-8 text-fyn-accent" />
-            <div>
-              <p className="font-semibold">Trading Economics</p>
-              <p className="text-sm text-fyn-text-dim">Global Economic Indicators</p>
-            </div>
-            <div className="ml-auto status-badge status-success">Connected</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {apiConfig?.apis && Object.entries(apiConfig.apis).map(([key, api]) => {
+              const Icon = apiIcons[key] || Globe
+              return (
+                <div key={key} className="flex items-center gap-4 p-4 bg-fyn-bg border border-fyn-border">
+                  <Icon className="w-8 h-8 text-fyn-accent" />
+                  <div>
+                    <p className="font-semibold capitalize">{key.replace('_', ' ')}</p>
+                    <p className="text-sm text-fyn-text-dim">{api.description}</p>
+                  </div>
+                  {getStatusBadge(api.configured)}
+                </div>
+              )
+            })}
           </div>
-          <div className="flex items-center gap-4 p-4 bg-fyn-bg border border-fyn-border">
-            <MessageSquare className="w-8 h-8 text-fyn-accent" />
-            <div>
-              <p className="font-semibold">Reddit API</p>
-              <p className="text-sm text-fyn-text-dim">Sentiment from r/wallstreetbets</p>
-            </div>
-            <div className="ml-auto status-badge status-success">Connected</div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-fyn-bg border border-fyn-border">
-            <Brain className="w-8 h-8 text-fyn-accent" />
-            <div>
-              <p className="font-semibold">Anthropic API</p>
-              <p className="text-sm text-fyn-text-dim">Claude Advanced Tool Use</p>
-            </div>
-            <div className="ml-auto status-badge status-success">Connected</div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Save Button */}
