@@ -1,0 +1,92 @@
+# DigitalOcean App Platform Specification for Fyn RAG
+# Deploy to: https://cloud.digitalocean.com/apps
+
+name: fyn-rag
+
+region: nyc
+
+# Backend Service
+services:
+  - name: backend
+    github:
+      repo: mcauduro0/fyn_rag
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: backend/Dockerfile
+    http_port: 8000
+    instance_count: 1
+    instance_size_slug: professional-xs
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 30
+    envs:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: BACKEND_HOST
+        value: "0.0.0.0"
+      - key: BACKEND_PORT
+        value: "8000"
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: OPENAI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: ANTHROPIC_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: FRED_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: TRADING_ECONOMICS_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: REDDIT_CLIENT_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: REDDIT_CLIENT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: REDDIT_USER_AGENT
+        value: "FynRAG/1.0"
+      - key: POLYGON_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: FMP_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: CORS_ORIGINS
+        value: "https://fyn-rag.ondigitalocean.app,http://localhost:3000"
+
+  - name: frontend
+    github:
+      repo: mcauduro0/fyn_rag
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: frontend/Dockerfile
+    http_port: 80
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /
+    envs:
+      - key: VITE_API_URL
+        value: ${backend.PUBLIC_URL}/api/v1
+
+# Database
+databases:
+  - name: fyn-rag-db
+    engine: PG
+    version: "15"
+    size: db-s-dev-database
+    num_nodes: 1
+
+# Alerts
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED

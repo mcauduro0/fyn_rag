@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from app.core.config import settings
-from app.api.endpoints import rag, data, analysis, monitoring
+from app.api.endpoints import rag, data, analysis, monitoring, advanced_analysis, api_health
 
 # Configure logging
 logging.basicConfig(
@@ -39,6 +39,8 @@ app.include_router(rag.router, prefix="/api/v1")
 app.include_router(data.router, prefix="/api/v1")
 app.include_router(analysis.router, prefix="/api/v1")
 app.include_router(monitoring.router, prefix="/api/v1")
+app.include_router(advanced_analysis.router, prefix="/api/v1")
+app.include_router(api_health.router, prefix="/api/v1")
 
 
 @app.get("/")
